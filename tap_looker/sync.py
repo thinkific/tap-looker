@@ -214,52 +214,54 @@ def sync_endpoint(client, #pylint: disable=too-many-branches
                     do_pass = True
                     if parent_id_field:
                         parent_id = record.get(parent_id_field)
-                    child_path = None
+                    base_child_path = None
                     if parent_id:
-                        child_path = child_endpoint_config.get('path').format(str(parent_id))
+                        base_child_path = child_endpoint_config.get('path').format(str(parent_id))
                     else:
                         do_pass = False
 
                     content_metadata_id = record.get('content_metadata_id')
-                    if content_metadata_id:
-                        child_path = child_path.replace('[content_metadata_id]', \
+                    if content_metadata_id and base_child_path:
+                        base_child_path = base_child_path.replace('[content_metadata_id]', \
                             str(content_metadata_id))
                     elif child_stream_name in ['content_metadata', 'content_metadata_access']:
                         do_pass = False
 
                     query_id = record.get('query_id')
-                    if query_id:
-                        child_path = child_path.replace('[query_id]', str(query_id))
+                    if query_id and base_child_path:
+                        base_child_path = base_child_path.replace('[query_id]', str(query_id))
                     elif child_stream_name == 'queries':
                         do_pass = False
 
                     merge_result_id = record.get('merge_result_id')
-                    if merge_result_id:
-                        child_path = child_path.replace('[merge_result_id]', str(merge_result_id))
+                    if merge_result_id and base_child_path:
+                        base_child_path = base_child_path.replace('[merge_result_id]', str(merge_result_id))
                     elif child_stream_name == 'merge_queries':
                         do_pass = False
 
                     if not do_pass:
                         LOGGER.info('%s, PATH does not pass: %s', child_stream_name, \
-                            child_path)
+                            base_child_path)
                     else:
                         for child in child_list:
-                            if child != 'self':
-                                child_path = child_path.replace('[child_id]', str(child))
+                            # Build a fresh path per child to avoid mutating and reusing prior replacements
+                            resolved_child_path = base_child_path
+                            if child != 'self' and resolved_child_path:
+                                resolved_child_path = resolved_child_path.replace('[child_id]', str(child))
                             LOGGER.info('Syncing: %s, %s, parent_stream: %s, parent_id: %s',
                                         child_stream_name,
                                         child,
                                         stream_name,
                                         parent_id)
 
-                            LOGGER.info('%s, child_path: %s', child_stream_name, child_path)
+                            LOGGER.info('%s, child_path: %s', child_stream_name, resolved_child_path)
                             child_total_records = sync_endpoint(
                                 client=client,
                                 catalog=catalog,
                                 state=state,
                                 start_date=start_date,
                                 stream_name=child_stream_name,
-                                path=child_path,
+                                path=resolved_child_path,
                                 endpoint_config=child_endpoint_config,
                                 bookmark_field=child_endpoint_config.get('bookmark_field'),
                                 method=child_endpoint_config.get('method', 'GET'),
