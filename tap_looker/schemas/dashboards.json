@@ -273,6 +273,39 @@
         "null",
         "string"
       ]
+    },
+    "certification_metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "certification_status": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "user_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "notes": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "updated_at": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "type": [
+        "null",
+        "object"
+      ]
     }
   },
   "type": [
