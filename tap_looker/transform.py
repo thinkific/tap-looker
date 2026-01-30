@@ -273,13 +273,7 @@ def ids_to_string(this_dict):
 def transform_json(this_json, stream_name):
     uncanny_json = remove_can_nodes(this_json)
     adjusted_json = None
-    if stream_name == 'dashboards':
-        # Remove LookML Dashboards
-        if isinstance(uncanny_json.get('id'), str):
-            adjusted_json = None
-        else:
-            adjusted_json = uncanny_json
-    elif stream_name == 'lookml_dashboards':
+    if stream_name == 'lookml_dashboards':
         # Remove User Defined Dashboards
         if isinstance(uncanny_json.get('id'), int):
             adjusted_json = None
