@@ -268,12 +268,15 @@ def ids_to_string(this_dict):
                     this_dict.pop(key, None)
     return this_dict
 
-
 # Run other transforms, as needed: denest_list_nodes, transform_conversation_parts
 def transform_json(this_json, stream_name):
     uncanny_json = remove_can_nodes(this_json)
     adjusted_json = None
-    if stream_name == 'lookml_dashboards':
+    if stream_name == 'dashboards':
+        id_value = uncanny_json.get('id')
+        if isinstance(id_value, str) and id_value.isdigit():
+            adjusted_json = uncanny_json
+    elif stream_name == 'lookml_dashboards':
         # Remove User Defined Dashboards
         if isinstance(uncanny_json.get('id'), int):
             adjusted_json = None
