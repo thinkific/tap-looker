@@ -277,10 +277,8 @@ def transform_json(this_json, stream_name):
         if isinstance(id_value, str) and id_value.isdigit():
             adjusted_json = uncanny_json
     elif stream_name == 'lookml_dashboards':
-        # Remove User Defined Dashboards
-        if isinstance(uncanny_json.get('id'), int):
-            adjusted_json = None
-        else:
+        id_value = uncanny_json.get('id')
+        if isinstance(id_value, str) and not id_value.isdigit():
             adjusted_json = uncanny_json
     elif stream_name in ('user_attribute_group_values', 'user_attribute_values'):
         this_value = str('{}'.format(uncanny_json.get('value')))
