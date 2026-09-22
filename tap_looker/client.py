@@ -70,7 +70,9 @@ class LookerClient:
     # API Authentication:
     #  https://docs.looker.com/reference/api-and-integration/api-reference/v3.1/api-auth
     @backoff.on_exception(backoff.expo,
-                          Server5xxError,
+                          (Server5xxError,
+                           requests.exceptions.ConnectionError,
+                           requests.exceptions.Timeout),
                           max_tries=5,
                           factor=2)
     def get_access_token(self):
@@ -104,8 +106,13 @@ class LookerClient:
         self.__expires = datetime.utcnow() + timedelta(seconds=expires_seconds)
 
 
+    # requests raises requests.exceptions.ConnectionError, which is NOT a subclass of
+    # the builtin ConnectionError, so it must be listed explicitly to be retried.
     @backoff.on_exception(backoff.expo,
-                          (Server5xxError, ConnectionError, Server429Error),
+                          (Server5xxError,
+                           Server429Error,
+                           requests.exceptions.ConnectionError,
+                           requests.exceptions.Timeout),
                           max_tries=7,
                           factor=3)
     # @utils.ratelimit(400, 60)
